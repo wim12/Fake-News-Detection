@@ -8,23 +8,69 @@ import matplotlib.pyplot as plt
 import numpy
 from sklearn.naive_bayes import MultinomialNB
 
-df = pd.read_csv('fake_or_real_news.csv')
+dataset = 'fake_or_real_news.csv'
 
-df.shape
 
-df.head()
+def loadPanda(dataset):
+    loaded_panda = pd.read_csv(dataset)
+    print(loaded_panda.shape)
+    loaded_panda = loaded_panda.set_index("Unnamed: 0")
+    print(loaded_panda.head())
+    loaded_panda.title = loaded_panda.title.str.lower()
+    loaded_panda.text = loaded_panda.text.str.lower()
+    print(loaded_panda.head())
+    # remove the URL's present
+    loaded_panda.title = loaded_panda.title.str.replace(r'http[\w:/\.]+', '<URL>')
+    loaded_panda.text = loaded_panda.text.str.replace(r'http[\w:/\.]+', '<URL>')
 
-df = df.set_index("Unnamed: 0")
-df.head()
+    # remove everything except for the characters and the punctuation
+    loaded_panda.title = loaded_panda.title.str.replace(r'[^\.\w\s]', '')
+    loaded_panda.text = loaded_panda.text.str.replace(r'[^\.\w\s]', '')
+
+    # replacing multiple . with one .
+    loaded_panda.title = loaded_panda.title.str.replace(r'[^\.\w\s]', '')
+    loaded_panda.text = loaded_panda.text.str.replace(r'[^\.\w\s]', '')
+
+    # adds spaces before and after each .
+    loaded_panda.title = loaded_panda.title.str.replace(r'\.', ' . ')
+    loaded_panda.text = loaded_panda.text.str.replace(r'\.', ' . ')
+
+    # replaces multiple spaces with single spaces
+    loaded_panda.title = loaded_panda.title.str.replace(r'\s\s+', ' ')
+    loaded_panda.text = loaded_panda.text.str.replace(r'\s\s+', ' ')
+
+    loaded_panda.title = loaded_panda.title.str.strip()
+    loaded_panda.text = loaded_panda.text.str.strip()
+    print(loaded_panda.shape)
+    print(loaded_panda.head())
+    return loaded_panda
+
+
+fakeRealPanda = loadPanda(dataset)
+
+fakeRealPanda.head()
 
 # Set `y`
-y = df.label
+y = fakeRealPanda.label
 
 # Drop the `label` column
-df.drop("label", axis=1)
+fakeRealPanda.drop("label", axis=1)
+
+
+def count_fe(train, test):
+    count_vectorizer = CountVectorizer(stop_words='english')
+
+    # Fit and transform the training data
+    count_train = count_vectorizer.fit_transform(X_train)
+
+    # Transform the test set
+    count_test = count_vectorizer.transform(X_test)
+
+    print(count_vectorizer.get_feature_names()[:10])
+
 
 # Make training and test sets
-X_train, X_test, y_train, y_test = train_test_split(df['text'], y, test_size=0.33, random_state=53)
+X_train, X_test, y_train, y_test = train_test_split(fakeRealPanda['text'], y, test_size=0.33, random_state=53)
 
 # Initialize the `count_vectorizer`
 count_vectorizer = CountVectorizer(stop_words='english')
@@ -98,6 +144,7 @@ def plot_confusion_matrix(cm, classes,
     plt.xlabel('Predicted label')
     plt.show()
 
+
 clf = MultinomialNB()
 
 clf.fit(tfidf_train, y_train)
@@ -106,7 +153,14 @@ score = metrics.accuracy_score(y_test, pred)
 print("accuracy:   %0.3f" % score)
 cm = metrics.confusion_matrix(y_test, pred, labels=['FAKE', 'REAL'])
 cmfass = plot_confusion_matrix(cm, classes=['FAKE', 'REAL'])
+tfi_f1 = metrics.f1_score(y_test, pred, average='macro')
+print('f1 score: ', tfi_f1)
+tfi_acc = metrics.accuracy_score(y_test, pred)
+print('accuracy: ', tfi_acc)
+tfi_prec = metrics.precision_score(y_test, pred, average='micro')
+print('precision: ', tfi_prec)
 
+print(metrics.classification_report(y_test,pred, labels=['FAKE', 'REAL']))
 
 clf = MultinomialNB()
 
@@ -117,3 +171,5 @@ print("accuracy:   %0.3f" % score)
 cm = metrics.confusion_matrix(y_test, pred, labels=['FAKE', 'REAL'])
 plot_confusion_matrix(cm, classes=['FAKE', 'REAL'])
 
+sxx = fakeRealPanda["title"]
+print(sxx)

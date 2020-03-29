@@ -1,9 +1,10 @@
 import itertools
 
 import pandas as pd
-from sklearn import metrics
+from sklearn import metrics, pipeline
 from sklearn import tree
 from sklearn.datasets import load_iris
+from sklearn.decomposition import PCA, TruncatedSVD
 from sklearn.feature_extraction.text import CountVectorizer, TfidfVectorizer
 from sklearn.linear_model import RidgeClassifier, SGDClassifier
 from sklearn.metrics import classification_report
@@ -12,7 +13,8 @@ import matplotlib.pyplot as plt
 import numpy
 from sklearn.naive_bayes import MultinomialNB
 from sklearn.neighbors import KNeighborsClassifier
-from sklearn.preprocessing import label_binarize
+from sklearn.pipeline import Pipeline
+from sklearn.preprocessing import label_binarize, StandardScaler
 from sklearn.svm import LinearSVC
 from sklearn.tree import DecisionTreeClassifier, plot_tree
 
@@ -115,6 +117,16 @@ print(count_df.equals(tfidf_df))
 
 count_df.head()
 tfidf_df.head()
+
+
+pipelinetest = Pipeline([
+    ('sca', StandardScaler(with_mean=False)),
+    ('pca', TruncatedSVD()),
+    ('sgd', SGDClassifier(loss="hinge", shuffle=True))
+])
+pipelinetest.fit(tfidf_train, y_train)
+pipepred = pipelinetest.predict(tfidf_test)
+print(classification_report(y_test, pipepred, labels=['FAKE', 'REAL']))
 
 
 def plot_confusion_matrix(cm, classes,

@@ -189,36 +189,76 @@ classifiers = [
     GradientBoostingClassifier()
 ]
 
+def hyperparams(classifier, parameters):
+    acc_scorer = make_scorer(accuracy_score)
+    gridmnb = GridSearchCV(classifier, parameters, scoring=acc_scorer)
+    gridmnb = gridmnb.fit(count_train, y_train)
+    classifier = gridmnb.best_estimator_
+    classifier.fit(count_train, y_train)
+    print(classifier, ': count vectorizer')
+    pred = classifier.predict(count_test)
+    printMets(y_test, pred)
+
+    acc_scorer2 = make_scorer(accuracy_score)
+    gridmnb = GridSearchCV(classifier, parameters, scoring=acc_scorer2)
+    gridmnb = gridmnb.fit(tfidf_train, y_train)
+    classifier = gridmnb.best_estimator_
+    classifier.fit(tfidf_train, y_train)
+    print(classifier, ': tfidf')
+    pred = classifier.predict(tfidf_test)
+    printMets(y_test, pred)
+    return classifier
+
 for classifier in classifiers:
     if classifier == classifiers[0]:
         parameters = {
             'alpha': [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0],
             'fit_prior': [True, False]
         }
-        acc_scorer = make_scorer(accuracy_score)
-        gridmnb = GridSearchCV(classifier, parameters, scoring=acc_scorer)
-        gridmnb = gridmnb.fit(count_train, y_train)
-        classifier = gridmnb.best_estimator_
+        classifier = hyperparams(classifier,parameters)
+
+    elif classifier == classifiers[1]:
+        parameters = {
+            'loss': ['hinge', 'log', 'modified_huber', 'squared_hinge', 'perceptron'],
+            'penalty': ['l2', 'l1', 'elasticnet'],
+            'n_iter': [1, 5, 10],
+            'alpha': [0.0001, 0.001, 0.01, 0.1, 1, 10, 100]
+        }
+        classifier = hyperparams(classifier, parameters)
+
+    elif classifier == classifiers[2]:
+        parameters = {
+            'n_neighbors': [3, 5, 7, 9, 11],
+            'weights': ['uniform', 'distance'],
+            'metric': ['euclidean', 'manhattan']
+        }
+        classifier = hyperparams(classifier, parameters)
+
+    elif classifier == classifiers[3]:
+        parameters = {
+            'alpha': [1, 0.1, 0.01, 0.001, 0.0001, 0],
+            'fit_intercept': [True, False],
+            'solver': ['svd', 'cholesky', 'lsqr', 'sparse_cg', 'sag', 'saga']
+        }
+        classifier = hyperparams(classifier, parameters)
+
+    elif classifier == classifiers[4]:
+        parameters = {
+            'max_depth': [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30],
+            'random_state': 5,
+            'criterion': ['gini', 'entropy']
+        }
+        classifier = hyperparams(classifier, parameters)
+    elif classifier == classifiers[5]:
+        parameters = {
+
+        }
+    else:
         classifier.fit(count_train, y_train)
         print(classifier, ': count vectorizer')
         pred = classifier.predict(count_test)
         printMets(y_test, pred)
-
-        acc_scorer2 = make_scorer(accuracy_score)
-        gridmnb = GridSearchCV(classifier, parameters, scoring=acc_scorer2)
-        gridmnb = gridmnb.fit(tfidf_train, y_train)
-        classifier = gridmnb.best_estimator_
         classifier.fit(tfidf_train, y_train)
         print(classifier, ': tfidf')
         pred = classifier.predict(tfidf_test)
         printMets(y_test, pred)
-
-
-    classifier.fit(count_train, y_train)
-    print(classifier, ': count vectorizer')
-    pred = classifier.predict(count_test)
-    printMets(y_test, pred)
-    classifier.fit(tfidf_train, y_train)
-    print(classifier, ': tfidf')
-    pred = classifier.predict(tfidf_test)
-    printMets(y_test, pred)

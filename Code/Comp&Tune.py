@@ -179,13 +179,12 @@ preproc = [
 
 classifiers = [
     MultinomialNB(),
-    SGDClassifier(loss="hinge", shuffle=True),
-    KNeighborsClassifier(n_neighbors=3),
+    SGDClassifier(shuffle=True),
+    KNeighborsClassifier(),
     RidgeClassifier(),
-    DecisionTreeClassifier(max_depth=4),
+    DecisionTreeClassifier(),
     LinearSVC(random_state=0),
     RandomForestClassifier(),
-    AdaBoostClassifier(),
     GradientBoostingClassifier()
 ]
 
@@ -221,7 +220,7 @@ for classifier in classifiers:
         parameters = {
             'loss': ['hinge', 'log', 'modified_huber', 'squared_hinge', 'perceptron'],
             'penalty': ['l2', 'l1', 'elasticnet'],
-            'n_iter': [1, 5, 10],
+            #'n_iter': [1, 5, 10],
             'alpha': [0.0001, 0.001, 0.01, 0.1, 1, 10, 100]
         }
         classifier = hyperparams(classifier, parameters)
@@ -238,21 +237,38 @@ for classifier in classifiers:
         parameters = {
             'alpha': [1, 0.1, 0.01, 0.001, 0.0001, 0],
             'fit_intercept': [True, False],
-            'solver': ['svd', 'cholesky', 'lsqr', 'sparse_cg', 'sag', 'saga']
+            'solver': ['sparse_cg', 'sag']
         }
         classifier = hyperparams(classifier, parameters)
 
     elif classifier == classifiers[4]:
         parameters = {
             'max_depth': [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30],
-            'random_state': 5,
+            'random_state': [5],
             'criterion': ['gini', 'entropy']
         }
         classifier = hyperparams(classifier, parameters)
     elif classifier == classifiers[5]:
         parameters = {
-
+            'C': [1, 10, 100, 1000]
         }
+        classifier = hyperparams(classifier, parameters)
+    elif classifier == classifiers[6]:
+        parameters = {
+            'bootstrap': [True, False],
+            'max_depth': [10, 20, 30, 40, 50, 60, 70, 80, 90, 100, None],
+            'max_features': ['auto', 'sqrt'],
+            'min_samples_leaf': [1, 2, 4],
+            'min_samples_split': [2, 5, 10],
+            'n_estimators': [200, 400, 600, 800, 1000, 1200, 1400, 1600, 1800, 2000]
+        }
+        classifier = hyperparams(classifier, parameters)
+    elif classifier == classifiers[7]:
+        parameters = {
+            'learning_rate': [0.15, 0.1, 0.05, 0.01, 0.005, 0.001],
+            'n_estimators': [100, 250, 500, 750, 1000, 1250, 1500, 1750]
+        }
+        classifier = hyperparams(classifier, parameters)
     else:
         classifier.fit(count_train, y_train)
         print(classifier, ': count vectorizer')
